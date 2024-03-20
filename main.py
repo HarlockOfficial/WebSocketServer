@@ -14,7 +14,7 @@ async def root():
     return {"status": "ok", "is_sender_connected": is_sender_connected, "is_receiver_connected": is_receiver_connected}
 
 
-@app.websocket("/send")
+@app.websocket("/ws/send")
 async def send(websocket: WebSocket):
     global is_sender_connected
     await websocket.accept()
@@ -29,7 +29,7 @@ async def send(websocket: WebSocket):
         is_sender_connected = False
         await websocket.close()
 
-@app.websocket("/receive")
+@app.websocket("/ws/receive")
 async def receive(websocket: WebSocket):
     global is_receiver_connected
     await websocket.accept()
