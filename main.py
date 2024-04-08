@@ -25,9 +25,11 @@ async def send(websocket: WebSocket):
             if is_receiver_connected:
                 await queue.put(payload_to_be_produced)
             await websocket.send_text(payload_to_be_produced)
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, ConnectionClosedError):
         is_sender_connected = False
-        await websocket.close()
+        while not queue.empty():
+            await queue.get()
+            queue.task_done()
 
 @app.websocket("/ws/receive")
 async def receive(websocket: WebSocket):
@@ -41,4 +43,6 @@ async def receive(websocket: WebSocket):
             queue.task_done()
     except (WebSocketDisconnect, ConnectionClosedError):
         is_receiver_connected = False
-        await websocket.close()
+        while not queue.empty():
+            await queue.get()
+            queue.task_done()
